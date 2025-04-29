@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { compare } from "bcryptjs" // Changed from bcrypt to bcryptjs
+import { compare } from "bcryptjs"
 import { cookies } from "next/headers"
 import { db } from "@/lib/db"
 import { createSession } from "@/lib/auth/session-manager"

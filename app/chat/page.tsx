@@ -8,10 +8,11 @@ import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { Send, Loader2 } from "lucide-react"
+import { Send, Loader2, AlertCircle, Info } from "lucide-react"
 import ChatMessage from "@/components/chat/chat-message"
 import TemplateRecommendations from "@/components/templates/template-recommendations"
 import { useToast } from "@/components/ui/use-toast"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface Message {
   id: string
@@ -36,7 +37,9 @@ export default function ChatPage() {
     },
   ])
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [templates, setTemplates] = useState<Template[]>([])
+  const [usingMockResponse, setUsingMockResponse] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth()
   const { toast } = useToast()
@@ -53,6 +56,9 @@ export default function ChatPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
+
+    // Clear previous errors
+    setError(null)
 
     // Add user message to chat
     const userMessage: Message = {
@@ -77,11 +83,16 @@ export default function ChatPage() {
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error("Failed to send message")
+        throw new Error(data.error || "Failed to send message")
       }
 
-      const data = await response.json()
+      // Check if using mock response
+      if (data.usingMockResponse) {
+        setUsingMockResponse(true)
+      }
 
       // Add assistant response to chat
       const assistantMessage: Message = {
@@ -97,9 +108,23 @@ export default function ChatPage() {
       }
     } catch (error) {
       console.error("Error sending message:", error)
+
+      // Set error message
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message. Please try again."
+
+      setError(errorMessage)
+
+      // Add error message as assistant response
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "I'm sorry, I encountered an error: " + errorMessage,
+      }
+      setMessages((prev) => [...prev, errorResponse])
+
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -113,6 +138,22 @@ export default function ChatPage() {
         <div className="md:col-span-2">
           <Card className="h-[70vh] flex flex-col">
             <CardContent className="flex-1 overflow-y-auto p-4">
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {usingMockResponse && (
+                <Alert className="mb-4">
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Demo mode: Using mock responses as no valid OpenAI API key is available.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="space-y-4 py-4">
                 {messages.map((message) => (
                   <ChatMessage key={message.id} message={message} />

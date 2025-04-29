@@ -3,6 +3,24 @@
 
 import type { Session } from "@/lib/auth/session-manager"
 import { randomBytes } from "crypto"
+import { hash } from "bcryptjs"
+
+// Create a default user for demo purposes
+const createDefaultUser = async () => {
+  return {
+    id: "default-user-id",
+    name: "Demo User",
+    email: "demo@example.com",
+    password: await hash("password123", 10),
+    createdAt: new Date(),
+  }
+}
+
+// Initialize default user
+let defaultUser: any = null
+;(async () => {
+  defaultUser = await createDefaultUser()
+})()
 
 // In-memory storage for development
 const storage = {
@@ -52,9 +70,17 @@ export const db = {
       return user
     },
     findById: async (id: string) => {
+      // Check default user first
+      if (defaultUser && defaultUser.id === id) {
+        return defaultUser
+      }
       return storage.users.get(id) || null
     },
     findByEmail: async (email: string) => {
+      // Check default user first
+      if (defaultUser && defaultUser.email === email) {
+        return defaultUser
+      }
       return storage.users.get(email) || null
     },
   },

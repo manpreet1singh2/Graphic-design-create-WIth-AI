@@ -66,14 +66,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify({ email, password }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Login failed")
+        throw new Error(data.error || "Login failed")
       }
 
-      const userData = await response.json()
-      setUser(userData)
-      return userData
+      setUser(data)
+      return data
     } catch (error) {
       console.error("Login error:", error)
       throw error
