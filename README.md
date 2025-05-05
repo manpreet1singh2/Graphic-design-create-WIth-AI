@@ -84,7 +84,7 @@ yarn dev
 
 ## 🌐 Live Demo
 
-👉 [**Click here to try Design Assistant!**](https://v0-chatbot-backend-requirements-nb2n78sep.vercel.app/chat)
+👉 [**Click here to try Design Assistant!**](https://v0-chatbot-backend-requirements-nb2n78sep.vercel.app/chat](https://v0-chatbot-backend-requirements-nb2n78sep.vercel.app/chat )
 
 Let your creativity flow with the help of AI. Whether you're designing a brand identity or a party invitation – **Design Assistant has your back!**
 
